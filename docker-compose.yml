@@ -1,0 +1,7 @@
+﻿services:
+  blazor-app:
+    image: game-asset-tracker  # Uses your existing Docker image
+    container_name: game-assets
+    ports:
+      - "8080:80"  # Maps port 8080 on the host to 80 inside the container
+    restart: unless-stopped  # Ensures it restarts if it crashes

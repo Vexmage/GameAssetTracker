@@ -1,0 +1,12 @@
+bin/
+obj/
+.vscode/
+.idea/
+node_modules/
+wwwroot/
+*.log
+*.tar
+*.zip
+.env
+Dockerfile
+docker-compose.override.yml
