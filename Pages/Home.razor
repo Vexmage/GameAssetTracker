@@ -1,42 +1,75 @@
 ﻿@page "/"
+@inject IndexedDbService DbService
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Game Asset Tracker</PageTitle>
 
 <div class="container mt-5">
-    <div class="row">
-        <div class="col-md-8">
-            <h1 class="text-primary">Welcome to Game Asset Tracker</h1>
-            <p class="lead">Keep track of your game assets effortlessly with our intuitive web app.</p>
-            <p>
-                Whether you're managing game characters, inventories, or tracking resources, we've got you covered.
-            </p>
-            <button class="btn btn-success btn-lg" @onclick="StartTracking">Get Started</button>
-        </div>
+    <h1 class="text-primary">Welcome to Game Asset Tracker</h1>
+    <p>Keep track of your game assets effortlessly with our intuitive web app.</p>
 
-        <div class="col-md-4 text-center">
-            <img src="https://via.placeholder.com/300" alt="Game Assets" class="img-fluid rounded shadow-lg">
+    <form @onsubmit="AddAsset">
+        <div class="mb-3">
+            <label for="name" class="form-label">Asset Name</label>
+            <input type="text" id="name" class="form-control" @bind="newAsset.Name" required />
         </div>
-    </div>
+        <div class="mb-3">
+            <label for="type" class="form-label">Asset Type</label>
+            <select id="type" class="form-select" @bind="newAsset.Type">
+                <option>Image</option>
+                <option>Sound</option>
+                <option>Script</option>
+                <option>Model</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Asset</button>
+    </form>
 
-    <div class="mt-5">
-        <h3 class="text-secondary">Features</h3>
-        <ul class="list-group">
-            <li class="list-group-item">
-                <i class="bi bi-check-circle-fill text-success"></i> Organize your game assets in one place
-            </li>
-            <li class="list-group-item">
-                <i class="bi bi-check-circle-fill text-success"></i> Track inventory and resources effortlessly
-            </li>
-            <li class="list-group-item">
-                <i class="bi bi-check-circle-fill text-success"></i> View statistics and insights
-            </li>
-        </ul>
-    </div>
+    <h2 class="mt-5">Assets</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var asset in assets)
+            {
+                <tr>
+                    <td>@asset.Name</td>
+                    <td>@asset.Type</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteAsset(asset.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
 
 @code {
-    private void StartTracking()
+    private GameAsset newAsset = new();
+    private List<GameAsset> assets = new();
+
+    protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine("Tracking started! Implement navigation logic here.");
+        await DbService.InitializeDatabaseAsync();
+        assets = await DbService.GetAssetsAsync();
+    }
+
+    private async Task AddAsset()
+    {
+        newAsset.Id = new Random().Next(1000, 9999);
+        await DbService.AddAssetAsync(newAsset);
+        assets = await DbService.GetAssetsAsync();
+        newAsset = new GameAsset();
+    }
+
+    private async Task DeleteAsset(int id)
+    {
+        await DbService.DeleteAssetAsync(id);
+        assets = await DbService.GetAssetsAsync();
     }
 }
+
